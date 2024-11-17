@@ -1,26 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Form handling
     const topicSelect = document.getElementById('topic');
     const customTopicInput = document.getElementById('custom_topic');
+    const searchForm = document.querySelector('.search-form');
+    const searchButton = document.querySelector('.search-button');
 
     // Clear custom topic when preset topic is selected
-    topicSelect.addEventListener('change', () => {
+    topicSelect?.addEventListener('change', () => {
         if (topicSelect.value) {
             customTopicInput.value = '';
         }
     });
 
     // Clear preset topic when custom topic is entered
-    customTopicInput.addEventListener('input', () => {
+    customTopicInput?.addEventListener('input', () => {
         if (customTopicInput.value) {
             topicSelect.value = '';
         }
     });
 
-    // Add loading state to form submission
-    const searchForm = document.querySelector('.search-form');
-    const searchButton = document.querySelector('.search-button');
-
-    searchForm.addEventListener('submit', (e) => {
+    // Form submission handling
+    searchForm?.addEventListener('submit', (e) => {
         if (!topicSelect.value && !customTopicInput.value.trim()) {
             e.preventDefault();
             alert('Please select a topic or enter a custom topic');
@@ -31,14 +31,40 @@ document.addEventListener('DOMContentLoaded', () => {
         searchButton.disabled = true;
     });
 
-    // Add lazy loading for images
-    const lazyLoadImages = () => {
+    // Source filtering
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const newsCards = document.querySelectorAll('.news-card');
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // Filter news cards
+            const source = button.dataset.source;
+            newsCards.forEach(card => {
+                if (source === 'all') {
+                    card.style.display = 'block';
+                } else if (source === 'The Hindu') {
+                    card.style.display = card.dataset.source === 'hindu' ? 'block' : 'none';
+                } else {
+                    card.style.display = card.dataset.source === 'general' ? 'block' : 'none';
+                }
+            });
+        });
+    });
+
+    // Lazy loading for images
+    if ('IntersectionObserver' in window) {
         const imageObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const img = entry.target;
-                    img.style.backgroundImage = `url('${img.dataset.src}')`;
-                    observer.unobserve(img);
+                    if (img.dataset.src) {
+                        img.style.backgroundImage = `url('${img.dataset.src}')`;
+                        observer.unobserve(img);
+                    }
                 }
             });
         });
@@ -46,20 +72,5 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.article-image[data-src]').forEach(img => {
             imageObserver.observe(img);
         });
-    };
-
-    // Initialize lazy loading
-    if ('IntersectionObserver' in window) {
-        lazyLoadImages();
     }
-
-    // Add smooth scroll to top
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    };
-
-    // Create scroll to top button
-    const scrollButton = document.createElement('button');
+});
