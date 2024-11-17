@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Aggregator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Welcome to the News Aggregator</h1>
+
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h2>Select or Add a Topic</h2>
+    <form method="POST">
+        <!-- Dropdown for predefined topics -->
+        <select name="topic">
+            <option value="">Select a Topic</option>
+            {% for topic in predefined_topics %}
+                <option value="{{ topic }}">{{ topic }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Or input a custom topic -->
+        <input type="text" name="topic" placeholder="Or enter a custom topic">
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Current Topics</h2>
+    <ul>
+        {% for topic in topics %}
+            <li>{{ topic }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
