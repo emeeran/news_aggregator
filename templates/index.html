@@ -3,44 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Aggregator</title>
+    <title>Enhanced News Aggregator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Welcome to the News Aggregator</h1>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-newspaper"></i> News Aggregator</h1>
+            <p class="subtitle">Stay informed with the latest news across various topics</p>
+        </header>
 
-    <!-- Display flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-            {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
-            {% endfor %}
-            </ul>
+        <form method="POST" class="search-form">
+            <div class="topic-selection">
+                <div class="preset-topics">
+                    <label for="topic">Choose a Topic:</label>
+                    <select id="topic" name="topic">
+                        <option value="" selected>-- Select Topic --</option>
+                        {% for topic in default_topics %}
+                            <option value="{{ topic }}">{{ topic }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="custom-topic">
+                    <label for="custom_topic">Or Enter Custom Topic:</label>
+                    <input type="text" id="custom_topic" name="custom_topic" placeholder="Enter any topic...">
+                </div>
+            </div>
+            <button type="submit" class="search-button">
+                <i class="fas fa-search"></i> Find News
+            </button>
+        </form>
+
+        {% if error_message %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i> {{ error_message }}
+            </div>
         {% endif %}
-    {% endwith %}
 
-    <h2>Select or Add a Topic</h2>
-    <form method="POST">
-        <!-- Dropdown for predefined topics -->
-        <select name="topic">
-            <option value="">Select a Topic</option>
-            {% for topic in predefined_topics %}
-                <option value="{{ topic }}">{{ topic }}</option>
-            {% endfor %}
-        </select>
-
-        <!-- Or input a custom topic -->
-        <input type="text" name="topic" placeholder="Or enter a custom topic">
-
-        <button type="submit">Submit</button>
-    </form>
-
-    <h2>Current Topics</h2>
-    <ul>
-        {% for topic in topics %}
-            <li>{{ topic }}</li>
-        {% endfor %}
-    </ul>
+        {% if news_articles %}
+            <div class="news-grid">
+                {% for article in news_articles %}
+                    <article class="news-card">
+                        {% if article.image_url %}
+                            <div class="article-image" style="background-image: url('{{ article.image_url }}')"></div>
+                        {% endif %}
+                        <div class="article-content">
+                            <h2 class="article-title">
+                                <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+                            </h2>
+                            <div class="article-meta">
+                                <span><i class="fas fa-newspaper"></i> {{ article.source }}</span>
+                                <span><i class="fas fa-clock"></i> {{ article.published_at }}</span>
+                                {% if article.author != "Unknown" %}
+                                    <span><i class="fas fa-user"></i> {{ article.author }}</span>
+                                {% endif %}
+                            </div>
+                            <p class="article-summary">{{ article.summary }}</p>
+                            <a href="{{ article.url }}" target="_blank" class="read-more">
+                                Read Full Article <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            {% if not error_message %}
+                <div class="welcome-message">
+                    <i class="fas fa-hand-point-up"></i>
+                    <p>Select a topic or enter your own to start exploring news!</p>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
