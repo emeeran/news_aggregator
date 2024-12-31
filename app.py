@@ -11,7 +11,7 @@ app = Flask(__name__)
 NEWS_API_KEY = "d2b4ffeb2bc14b02b97a2279d4d5628b"
 NEWS_API_URL = "https://newsapi.org/v2/everything"
 HINDU_API_URL = "https://the-hindu-national-news.p.rapidapi.com/api/news"
-HINDU_API_KEY = "YOUR_RAPIDAPI_KEY"  # Replace with your RapidAPI key
+HINDU_API_KEY = "RAPID_API_KEY"
 
 HINDU_HEADERS = {
     "X-RapidAPI-Key": HINDU_API_KEY,
@@ -19,8 +19,7 @@ HINDU_HEADERS = {
 }
 
 
-def get_summary(text, num_lines=5):
-    """Generate a 5-line summary from the text."""
+def get_summary(text, num_lines=25):
     if not text:
         return ""
 
@@ -35,7 +34,7 @@ def get_summary(text, num_lines=5):
     for sent in sentences:
         if len(summary_sentences) >= num_lines:
             break
-        if len(sent.split()) > 3:
+        if len(sent.split()) > 5:
             summary_sentences.append(sent)
 
     summary = ". ".join(summary_sentences)
@@ -46,7 +45,7 @@ def get_summary(text, num_lines=5):
 
 
 def clean_html(text):
-    """Clean HTML entities and tags from text."""
+    """Cleans HTML entities and tags from the given text."""
     if not text:
         return ""
     text = html.unescape(text)
@@ -55,7 +54,7 @@ def clean_html(text):
 
 
 def get_hindu_news():
-    """Fetch news from The Hindu API."""
+    """Fetches news articles from The Hindu API."""
     try:
         response = requests.get(HINDU_API_URL, headers=HINDU_HEADERS)
         response.raise_for_status()
@@ -84,7 +83,7 @@ def get_hindu_news():
 
 
 def get_news_api_articles(topic):
-    """Fetch news from News API."""
+    """Fetches news articles from the News API based on the given topic."""
     params = {
         "q": topic,
         "apiKey": NEWS_API_KEY,
@@ -129,7 +128,7 @@ def get_news_api_articles(topic):
 
 
 def merge_and_sort_news(topic_news, hindu_news):
-    """Merge and sort news articles by date."""
+    """Merges news articles from both sources and sorts them by date."""
     all_news = topic_news + hindu_news
     return sorted(all_news, key=lambda x: x.get("published_at", ""), reverse=True)
 
@@ -179,8 +178,29 @@ def home():
     )
 
 
+@app.route("/refresh", methods=["GET"])
+def refresh_news():
+    """Endpoint to refresh news articles."""
+    try:
+        # Default topics can be adjusted as needed
+        default_topic = "Technology"
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            topic_future = executor.submit(get_news_api_articles, default_topic)
+            hindu_future = executor.submit(get_hindu_news)
+
+            topic_news = topic_future.result()
+            hindu_news = hindu_future.result()
+
+        news_articles = merge_and_sort_news(topic_news, hindu_news)
+
+        return jsonify({"news_articles": news_articles}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 def format_date(date_str):
-    """Format the date string to a more readable format."""
+    """Formats the given date string to a more readable format."""
     if not date_str:
         return ""
     try:
@@ -197,4 +217,4 @@ def format_date(date_str):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False, use_reloader=False)

@@ -1,0 +1,18 @@
+certifi==2024.12.14
+charset-normalizer==3.4.1
+click==8.1.8
+fastjsonschema==2.21.1
+Flask==2.2.5
+idna==3.10
+itsdangerous==2.2.0
+Jinja2==3.1.5
+MarkupSafe==3.0.2
+-e git+https://github.com/emeeran/news_aggregator.git@70f859bc36227a8ea8541d1f4cd2c67342772018#egg=news_agregator
+requests==2.31.0
+ruff==0.7.4
+toml==0.10.2
+tomli==2.2.1
+tomli_w==1.1.0
+urllib3==2.3.0
+validate-pyproject==0.23
+Werkzeug==3.1.3

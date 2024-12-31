@@ -6,87 +6,149 @@
     <title>Enhanced News Aggregator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1><i class="fas fa-newspaper"></i> News Aggregator</h1>
-            <p class="subtitle">Combined news from multiple sources including The Hindu</p>
-        </header>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <header>
+                <h1><i class="fas fa-newspaper"></i> News Aggregator</h1>
+                <p class="subtitle">Combined news from multiple sources including The Hindu</p>
+            </header>
 
-        <form method="POST" class="search-form">
-            <div class="topic-selection">
-                <div class="preset-topics">
-                    <label for="topic">Choose a Topic:</label>
-                    <select id="topic" name="topic">
-                        <option value="" selected>-- Select Topic --</option>
-                        {% for topic in default_topics %}
-                            <option value="{{ topic }}" {% if topic == selected_topic %}selected{% endif %}>
-                                {{ topic }}
-                            </option>
-                        {% endfor %}
-                    </select>
+            <form method="POST" class="search-form" aria-label="Search News">
+                <div class="topic-selection">
+                    <div class="preset-topics">
+                        <label for="topic">Choose a Topic:</label>
+                        <select id="topic" name="topic" aria-label="Select Topic">
+                            <option value="" selected>-- Select Topic --</option>
+                            {% for topic in default_topics %}
+                                <option value="{{ topic }}" {% if topic == selected_topic %}selected{% endif %}>
+                                    {{ topic }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="custom-topic">
+                        <label for="custom_topic">Or Enter Custom Topic:</label>
+                        <input type="text" id="custom_topic" name="custom_topic" placeholder="Enter any topic..." aria-label="Custom Topic">
+                    </div>
                 </div>
-
-                <div class="custom-topic">
-                    <label for="custom_topic">Or Enter Custom Topic:</label>
-                    <input type="text" id="custom_topic" name="custom_topic" placeholder="Enter any topic...">
+                <div class="form-buttons">
+                    <button type="submit" class="search-button" aria-label="Find News">
+                        <i class="fas fa-search"></i> Find News
+                    </button>
+                    <button type="button" id="refresh-button" aria-label="Refresh News">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
                 </div>
-            </div>
-            <button type="submit" class="search-button">
-                <i class="fas fa-search"></i> Find News
-            </button>
-        </form>
+            </form>
 
-        {% if error_message %}
-            <div class="error-message">
-                <i class="fas fa-exclamation-circle"></i> {{ error_message }}
-            </div>
-        {% endif %}
-
-        {% if news_articles %}
-            <div class="source-filters">
-                <button class="filter-btn active" data-source="all">All Sources</button>
-                <button class="filter-btn" data-source="The Hindu">The Hindu</button>
-                <button class="filter-btn" data-source="General">Other Sources</button>
-            </div>
-
-            <div class="news-grid">
-                {% for article in news_articles %}
-                    <article class="news-card" data-source="{{ 'hindu' if article.source == 'The Hindu' else 'general' }}">
-                        {% if article.image_url %}
-                            <div class="article-image" style="background-image: url('{{ article.image_url }}')"></div>
-                        {% endif %}
-                        <div class="article-content">
-                            <div class="source-badge {{ 'hindu' if article.source == 'The Hindu' else 'general' }}">
-                                {{ article.source }}
-                            </div>
-                            <h2 class="article-title">
-                                <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
-                            </h2>
-                            <div class="article-meta">
-                                <span><i class="fas fa-clock"></i> {{ article.published_at }}</span>
-                                {% if article.author != "Unknown" %}
-                                    <span><i class="fas fa-user"></i> {{ article.author }}</span>
-                                {% endif %}
-                            </div>
-                            <p class="article-summary">{{ article.summary }}</p>
-                            <a href="{{ article.url }}" target="_blank" class="read-more">
-                                Read Full Article <i class="fas fa-external-link-alt"></i>
-                            </a>
-                        </div>
-                    </article>
-                {% endfor %}
-            </div>
-        {% else %}
-            {% if not error_message %}
-                <div class="welcome-message">
-                    <i class="fas fa-hand-point-up"></i>
-                    <p>Select a topic or enter your own to start exploring news!</p>
+            {% if error_message %}
+                <div class="error-message" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> {{ error_message }}
                 </div>
             {% endif %}
-        {% endif %}
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% if news_articles %}
+                <div class="news-grid" id="news-articles">
+                    {% for article in news_articles %}
+                        <article class="news-card" data-source="{{ 'hindu' if article.source == 'The Hindu' else 'general' }}">
+                            {% if article.image_url %}
+                                <div class="article-image" style="background-image: url('{{ article.image_url }}')" role="img" aria-label="Article Image"></div>
+                            {% endif %}
+                            <div class="article-content">
+                                <div class="source-badge {{ 'hindu' if article.source == 'The Hindu' else 'general' }}">
+                                    {{ article.source }}
+                                </div>
+                                <h2 class="article-title">
+                                    <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+                                </h2>
+                                <div class="article-meta">
+                                    <span><i class="fas fa-clock"></i> {{ article.published_at }}</span>
+                                    {% if article.author != "Unknown" %}
+                                        <span><i class="fas fa-user"></i> {{ article.author }}</span>
+                                    {% endif %}
+                                </div>
+                                <p class="article-summary">{{ article.summary }}</p>
+                                <a href="{{ article.url }}" target="_blank" class="read-more">
+                                    Read Full Article <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loading-spinner" class="spinner" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            {% else %}
+                {% if not error_message %}
+                    <div class="welcome-message">
+                        <i class="fas fa-hand-point-up"></i>
+                        <p>Select a topic or enter your own to start exploring news!</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </main>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        $(document).ready(function(){
+            $('#refresh-button').click(function(){
+                $('#loading-spinner').show();
+                $('#refresh-button').prop('disabled', true);
+
+                $.ajax({
+                    url: '/refresh',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data){
+                        if(data.news_articles){
+                            let articlesHtml = '';
+                            data.news_articles.forEach(function(article){
+                                articlesHtml += `
+                                    <article class="news-card" data-source="${article.source == 'The Hindu' ? 'hindu' : 'general'}">
+                                        ${article.image_url ? `<div class="article-image" style="background-image: url('${article.image_url}')"></div>` : ''}
+                                        <div class="article-content">
+                                            <div class="source-badge ${article.source == 'The Hindu' ? 'hindu' : 'general'}">
+                                                ${article.source}
+                                            </div>
+                                            <h2 class="article-title">
+                                                <a href="${article.url}" target="_blank">${article.title}</a>
+                                            </h2>
+                                            <div class="article-meta">
+                                                <span><i class="fas fa-clock"></i> ${article.published_at}</span>
+                                                ${article.author != "Unknown" ? `<span><i class="fas fa-user"></i> ${article.author}</span>` : ''}
+                                            </div>
+                                            <p class="article-summary">${article.summary}</p>
+                                            <a href="${article.url}" target="_blank" class="read-more">
+                                                Read Full Article <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </div>
+                                    </article>
+                                `;
+                            });
+                            $('#news-articles').html(articlesHtml);
+                            $('html, body').animate({ scrollTop: $('#news-articles').offset().top }, 'slow');
+                        }
+                    },
+                    error: function(xhr, status, error){
+                        alert('Error refreshing news: ' + error);
+                    },
+                    complete: function(){
+                        $('#loading-spinner').hide();
+                        $('#refresh-button').prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
