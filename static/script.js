@@ -12,10 +12,10 @@ $(document).ready(function(){
                     let articlesHtml = '';
                     data.news_articles.forEach(function(article){
                         articlesHtml += `
-                            <article class="news-card" data-source="${article.source == 'The Hindu' ? 'hindu' : 'general'}">
+                            <article class="news-card">
                                 ${article.image_url ? `<img src="${article.image_url}" alt="Image for ${article.title}" class="article-image">` : ''}
                                 <div class="article-content">
-                                    <div class="source-badge ${article.source == 'The Hindu' ? 'hindu' : 'general'}">
+                                    <div class="source-badge">
                                         ${article.source}
                                     </div>
                                     <h2 class="article-title">

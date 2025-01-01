@@ -161,13 +161,11 @@
     font-weight: bold; /* Added font weight */
 }
 
-.source-badge.hindu {
-    background-color: #e67e22;
-}
-
 .source-badge.general {
     background-color: #3498db;
 }
+
+/* Removed .source-badge.hindu styles */
 
 .article-title a {
     text-decoration: none;

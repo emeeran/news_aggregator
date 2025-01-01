@@ -10,13 +10,6 @@ app = Flask(__name__)
 # API Keys and URLs
 NEWS_API_KEY = "d2b4ffeb2bc14b02b97a2279d4d5628b"
 NEWS_API_URL = "https://newsapi.org/v2/everything"
-HINDU_API_URL = "https://the-hindu-national-news.p.rapidapi.com/api/news"
-HINDU_API_KEY = "RAPID_API_KEY"
-
-HINDU_HEADERS = {
-    "X-RapidAPI-Key": HINDU_API_KEY,
-    "X-RapidAPI-Host": "the-hindu-national-news.p.rapidapi.com",
-}
 
 
 def get_summary(text, num_lines=15):
@@ -51,35 +44,6 @@ def clean_html(text):
     text = html.unescape(text)
     text = re.sub(r"<[^>]+>", "", text)
     return text
-
-
-def get_hindu_news():
-    """Fetches news articles from The Hindu API."""
-    try:
-        response = requests.get(HINDU_API_URL, headers=HINDU_HEADERS)
-        response.raise_for_status()
-        hindu_data = response.json()
-
-        processed_articles = []
-        for article in hindu_data.get("data", []):
-            processed_article = {
-                "title": clean_html(article.get("title", "")),
-                "url": article.get("url", ""),
-                "source": "The Hindu",
-                "published_at": format_date(article.get("published_date", "")),
-                "summary": get_summary(article.get("description", "")),
-                "image_url": article.get("image_url", ""),
-                "author": article.get("author", "The Hindu"),
-                "category": "Hindu News",
-            }
-
-            if processed_article["title"] and processed_article["url"]:
-                processed_articles.append(processed_article)
-
-        return processed_articles
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching The Hindu news: {e}")
-        return []
 
 
 def get_news_api_articles(topic):
@@ -127,9 +91,9 @@ def get_news_api_articles(topic):
         return []
 
 
-def merge_and_sort_news(topic_news, hindu_news):
-    """Merges news articles from both sources and sorts them by date."""
-    all_news = topic_news + hindu_news
+def merge_and_sort_news(topic_news):
+    """Merges news articles and sorts them by date."""
+    all_news = topic_news
     return sorted(all_news, key=lambda x: x.get("published_at", ""), reverse=True)
 
 
@@ -156,15 +120,10 @@ def home():
 
         if topic:
             selected_topic = topic
-            # Use ThreadPoolExecutor to fetch from both APIs concurrently
-            with ThreadPoolExecutor(max_workers=2) as executor:
-                topic_future = executor.submit(get_news_api_articles, topic)
-                hindu_future = executor.submit(get_hindu_news)
+            # Fetch only from News API
+            topic_news = get_news_api_articles(topic)
 
-                topic_news = topic_future.result()
-                hindu_news = hindu_future.result()
-
-            news_articles = merge_and_sort_news(topic_news, hindu_news)
+            news_articles = merge_and_sort_news(topic_news)
 
             if not news_articles:
                 error_message = f"No news found for topic: {topic}"
@@ -182,17 +141,11 @@ def home():
 def refresh_news():
     """Endpoint to refresh news articles."""
     try:
-        # Default topics can be adjusted as needed
         default_topic = "Technology"
 
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            topic_future = executor.submit(get_news_api_articles, default_topic)
-            hindu_future = executor.submit(get_hindu_news)
+        topic_news = get_news_api_articles(default_topic)
 
-            topic_news = topic_future.result()
-            hindu_news = hindu_future.result()
-
-        news_articles = merge_and_sort_news(topic_news, hindu_news)
+        news_articles = merge_and_sort_news(topic_news)
 
         return jsonify({"news_articles": news_articles}), 200
     except Exception as e:
