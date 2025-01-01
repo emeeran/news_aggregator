@@ -19,7 +19,7 @@ HINDU_HEADERS = {
 }
 
 
-def get_summary(text, num_lines=25):
+def get_summary(text, num_lines=15):
     if not text:
         return ""
 
@@ -88,7 +88,7 @@ def get_news_api_articles(topic):
         "q": topic,
         "apiKey": NEWS_API_KEY,
         "language": "en",
-        "pageSize": 10,
+        "pageSize": 25,
         "sortBy": "publishedAt",
     }
 
@@ -212,7 +212,7 @@ def format_date(date_str):
             except ValueError:
                 continue
         return date_str
-    except:
+    except Exception:  # Changed from bare except
         return date_str
 
 

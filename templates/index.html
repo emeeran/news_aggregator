@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced News Aggregator</title>
+    <title>News Aggregator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -14,7 +14,7 @@
         <aside class="sidebar">
             <header>
                 <h1><i class="fas fa-newspaper"></i> News Aggregator</h1>
-                <p class="subtitle">Combined news from multiple sources including The Hindu</p>
+                <p class="subtitle">News from multiple sources</p>
             </header>
 
             <form method="POST" class="search-form" aria-label="Search News">
@@ -59,9 +59,6 @@
                 <div class="news-grid" id="news-articles">
                     {% for article in news_articles %}
                         <article class="news-card" data-source="{{ 'hindu' if article.source == 'The Hindu' else 'general' }}">
-                            {% if article.image_url %}
-                                <div class="article-image" style="background-image: url('{{ article.image_url }}')" role="img" aria-label="Article Image"></div>
-                            {% endif %}
                             <div class="article-content">
                                 <div class="source-badge {{ 'hindu' if article.source == 'The Hindu' else 'general' }}">
                                     {{ article.source }}
@@ -115,7 +112,6 @@
                             data.news_articles.forEach(function(article){
                                 articlesHtml += `
                                     <article class="news-card" data-source="${article.source == 'The Hindu' ? 'hindu' : 'general'}">
-                                        ${article.image_url ? `<div class="article-image" style="background-image: url('${article.image_url}')"></div>` : ''}
                                         <div class="article-content">
                                             <div class="source-badge ${article.source == 'The Hindu' ? 'hindu' : 'general'}">
                                                 ${article.source}

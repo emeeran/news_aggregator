@@ -13,7 +13,6 @@ $(document).ready(function(){
                     data.news_articles.forEach(function(article){
                         articlesHtml += `
                             <article class="news-card" data-source="${article.source == 'The Hindu' ? 'hindu' : 'general'}">
-                                ${article.image_url ? `<div class="article-image" style="background-image: url('${article.image_url}')"></div>` : ''}
                                 <div class="article-content">
                                     <div class="source-badge ${article.source == 'The Hindu' ? 'hindu' : 'general'}">
                                         ${article.source}
@@ -34,7 +33,7 @@ $(document).ready(function(){
                         `;
                     });
                     $('#news-articles').html(articlesHtml);
-                    $('html, body').animate({ scrollTop: $('#news-articles').offset().top }, 'slow');
+                    $('html, body').animate({ scrollTop: $('#news-articles').offset().top }, 'slow'); // Smooth scroll
                 }
             },
             error: function(xhr, status, error){
