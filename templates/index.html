@@ -59,6 +59,9 @@
                 <div class="news-grid" id="news-articles">
                     {% for article in news_articles %}
                         <article class="news-card" data-source="{{ 'hindu' if article.source == 'The Hindu' else 'general' }}">
+                            {% if article.image_url %}
+                                <img src="{{ article.image_url }}" alt="Image for {{ article.title }}" class="article-image">
+                            {% endif %}
                             <div class="article-content">
                                 <div class="source-badge {{ 'hindu' if article.source == 'The Hindu' else 'general' }}">
                                     {{ article.source }}
@@ -112,6 +115,7 @@
                             data.news_articles.forEach(function(article){
                                 articlesHtml += `
                                     <article class="news-card" data-source="${article.source == 'The Hindu' ? 'hindu' : 'general'}">
+                                        ${article.image_url ? `<img src="${article.image_url}" alt="Image for ${article.title}" class="article-image">` : ''}
                                         <div class="article-content">
                                             <div class="source-badge ${article.source == 'The Hindu' ? 'hindu' : 'general'}">
                                                 ${article.source}
